@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html ng-app="geoApp">
+
+<head>
+    <title>Geo Project</title>
+    <!-- <meta http-equiv="content-type" content="text/html; charset=UTF8"> -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-1.10.0.min.js"></script>
+    <!-- Bootstrap -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <!-- Leaflet Stuff -->
+    <link rel="stylesheet" href="component/leaflet/leaflet.css" />
+    <script src="component/leaflet/leaflet.js"></script>
+    <script src="component/leaflet/leaflet-heat.js"></script>
+    <!-- File Picker -->
+    <!-- Dependencies -->
+    <script type="text/javascript" src="node_modules/angular/angular.min.js"></script>
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+
+    <!-- Use Bower! -->
+    <!-- bower:js -->
+    <!-- endbower -->
+
+    <!-- Grunt Wiredep not working???? -->
+
+    <!-- Special Stuff for D3. Hate this -->
+    <!-- Need to Manually add in D3 later -->
+    <script charset="utf-8" src="bower_components/d3/d3.min.js"></script>
+    <script type="text/javascript" src="bower_components/c3/c3.js"></script>
+    <link rel="stylesheet" type="text/css" href="bower_components/c3/c3.css">
+</head>
+
+<body>
+    <!-- Nav -->
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">
+                    <!-- <img alt="Brand" src="..."> -->
+                    LOGO
+                </a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#pattern">
+                            Pattern
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#analysis">
+                            L Function
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#buffer">
+                            Buffer
+                        </button>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#admin">
+                            Admin
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+    <!-- Map -->
+    <div id="map"></div>
+    <div id="result">
+        <!-- <img id="result_img" src="http://strata.uga.edu/6370/lecturenotes/images/likelihoodCurves3.png"> -->
+    </div>
+    <!-- Pattern Modal -->
+    <div class="modal fade" id="pattern" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Pattern</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form">
+                        <h3>Function to apply</h3>
+                        <label class="radio-inline">
+                            <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1"> HeatMap(KDE)
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="inlineRadioOptions" id="inlineRadio3" value="option3"> HeatMap(Quadrat)
+                        </label>
+                        <h3>Data be applied</h3>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value=""> HDB
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value=""> Clinics
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value=""> Screen Center
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value=""> Elderly Care
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Analysis Pop Up -->
+    <div class="modal fade" id="analysis" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">L Function</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form" id="l_form">
+                        <!-- <h3>Function to apply</h3>
+                        <label class="radio-inline">
+                            <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1"> K
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2"> L
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="inlineRadioOptions" id="inlineRadio3" value="option3"> Bivariate k
+                        </label> -->
+                        <h3>Data be applied</h3>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="data-option" value=""> HDB (no data)
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="data-option" value="data/MOH_CHAS_CLINICS_raw.js"> Clinics
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="data-option" value="data/BREASTSCREEN_raw.js"> Screen Center
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="data-option" value="data/ELDERCARE_raw.js"> Elderly Care
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="L_function()">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Buffer Pop Up -->
+    <div class="modal fade" id="buffer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Buffer</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form">
+                        <h3>Data be applied</h3>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value=""> HDB
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value=""> Clinics
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value=""> Screen Center
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value=""> Elderly Care
+                            </label>
+                        </div>
+                        <h3>Radius(in meters)</h3>
+                        <input type="text" name="distance" id="inputDistance" class="form-control" value="" required="required" pattern="" title="" placeholder="e.g. 500">
+                        <h3>Point to Count</h3>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value=""> HDB
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value=""> Clinics
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value=""> Screen Center
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value=""> Elderly Care
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Admin -->
+    <div class="modal fade" id="admin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Admin</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td>Data</td>
+                            <td>Action</td>
+                        </tr>
+                        <tr>
+                            <td>HDB</td>
+                            <td>
+                                <button type="button" class="btn btn-danger">Remove</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Clinics</td>
+                            <td>
+                                <button type="button" class="btn btn-danger">Remove</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Screen</td>
+                            <td>
+                                <button type="button" class="btn btn-danger">Remove</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Elderly</td>
+                            <td>
+                                <button type="button" class="btn btn-danger">Remove</button>
+                            </td>
+                        </tr>
+                    </table>
+                    <!-- <button type="button" class="btn btn-default btn-lg">Upload New Data</button> -->
+                    <h4>Upload New File</h4>
+                    <input type="filepicker" data-fp-apikey="AgEIfy26PSXqNSKhTogqEz" name="Upload New" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Buffer Details -->
+    <div ng-controller="detailsController" id="details">
+        <p>Details</p>
+        <ul>
+            <li ng-repeat="(key, value) in features_in_check">
+                within {{buffer_radius}} around {{value.properties.HCI_NAME}}, there are
+                <ul>
+                    <li ng-repeat="target in value.inRange">
+                        name : {{target.properties.NAME}}
+                        postcode : {{target.properties.ADDRESSPOS}}
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <!-- Chart -->
+    <div id="chart"></div>
+</body>
+<!-- DATA HARDCODED -->
+<script type="text/javascript" src="data/MOH_CHAS_CLINICS.js"></script>
+<script type="text/javascript" src="data/BREASTSCREEN.js"></script>
+<script type="text/javascript" src="data/ELDERCARE.js"></script>
+<!-- Utility -->
+<script type="text/javascript" src="component/util.js"></script>
+<!-- MAIN -->
+<script type="text/javascript" src="component/main.js"></script>
+
+</html>
+<!-- File Upload. To be Done Later -->
+<!-- <script type="text/javascript" src="https://api.filepicker.io/v1/filepicker.js"></script> -->
