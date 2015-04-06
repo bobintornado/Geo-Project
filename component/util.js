@@ -23,7 +23,9 @@ L_function = function() {
     var theUrl = function_url.concat(target_file);
 
     // Can't use local file?!
-    var dropboxUrl = "http://localhost:8080/GEO/RequestRServlet?f=l&source=https://dl.dropboxusercontent.com/u/39327697/MOH_CHAS_CLINICS_raw.js"
+    // var dropboxUrl = "http://localhost:8080/GEO/RequestRServlet?f=l&source="+data.link;
+    var dropboxUrl = "http://localhost:8080/GEO/RequestRServlet?f=l&source=https://dl.dropboxusercontent.com/u/39327697/MOH_CHAS_CLINICS_raw.js";
+
 
     xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {

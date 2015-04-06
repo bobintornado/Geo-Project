@@ -18,13 +18,10 @@
     <script type="text/javascript" src="node_modules/angular/angular.min.js"></script>
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="css/main.css">
-
     <!-- Use Bower! -->
     <!-- bower:js -->
     <!-- endbower -->
-
     <!-- Grunt Wiredep not working???? -->
-
     <!-- Special Stuff for D3. Hate this -->
     <!-- Need to Manually add in D3 later -->
     <script charset="utf-8" src="bower_components/d3/d3.min.js"></script>
@@ -33,40 +30,45 @@
 </head>
 
 <body>
+    <!-- Page loading spinner -->
+    <div id="loader-wrapper">
+        <div id="loader"></div>
+        <div class="loader-section section-left"></div>
+        <div class="loader-section section-right"></div>
+    </div>
     <!-- Nav -->
     <nav class="navbar navbar-default">
         <div class="container-fluid">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
                 <a class="navbar-brand" href="#">
-                    <!-- <img alt="Brand" src="..."> -->
-                    LOGO
+                    <img alt="Logo" src="images/BYQLogo.png" id="logo">
                 </a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <li>
-                        <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#pattern">
-                            Pattern
-                        </button>
+                        <a class="btn" data-toggle="modal" data-target="#pattern">
+                            KDE <!-- <span class="sr-only">(current)</span> -->
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a class="btn" data-toggle="modal" data-target="#analysis">
+                            L Function <span class="sr-only">(current)</span>
+                        </a>
                     </li>
                     <li>
-                        <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#analysis">
-                            L Function
-                        </button>
-                    </li>
-                    <li>
-                        <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#buffer">
-                            Buffer
-                        </button>
+                        <a class="btn" data-toggle="modal" data-target="#buffer">
+                            Buffer <span class="sr-only">(current)</span>
+                        </a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#admin">
-                            Admin
-                        </button>
+                        <a class="btn" data-toggle="modal" data-target="#admin">
+                            Admin 
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -84,43 +86,21 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">Pattern</h4>
+                    <h4 class="modal-title" id="myModalLabel">KDE</h4>
                 </div>
-                <div class="modal-body">
-                    <form role="form">
-                        <h3>Function to apply</h3>
-                        <label class="radio-inline">
-                            <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1"> HeatMap(KDE)
-                        </label>
-                        <label class="radio-inline">
-                            <input type="radio" name="inlineRadioOptions" id="inlineRadio3" value="option3"> HeatMap(Quadrat)
-                        </label>
-                        <h3>Data be applied</h3>
-                        <div class="checkbox">
+                <div class="modal-body" ng-controller="KDEController">
+                    <h3 class="first_title">Chose the dataset to run KDE</h3>
+                    <form role="form">    
+                        <div class="radio" ng-repeat="data in list">
                             <label>
-                                <input type="checkbox" value=""> HDB
-                            </label>
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" value=""> Clinics
-                            </label>
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" value=""> Screen Center
-                            </label>
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" value=""> Elderly Care
+                                <input type="radio" name="data-option" value=""> {{data.Name}}
                             </label>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Apply</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Run</button>
                 </div>
             </div>
         </div>
@@ -134,17 +114,7 @@
                 </div>
                 <div class="modal-body">
                     <form role="form" id="l_form">
-                        <!-- <h3>Function to apply</h3>
-                        <label class="radio-inline">
-                            <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1"> K
-                        </label>
-                        <label class="radio-inline">
-                            <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2"> L
-                        </label>
-                        <label class="radio-inline">
-                            <input type="radio" name="inlineRadioOptions" id="inlineRadio3" value="option3"> Bivariate k
-                        </label> -->
-                        <h3>Data be applied</h3>
+                        <h3 class="first_title">Data be applied</h3>
                         <div class="radio">
                             <label>
                                 <input type="radio" name="data-option" value=""> HDB (no data)
@@ -292,8 +262,7 @@
                 within {{buffer_radius}} around {{value.properties.HCI_NAME}}, there are
                 <ul>
                     <li ng-repeat="target in value.inRange">
-                        name : {{target.properties.NAME}}
-                        postcode : {{target.properties.ADDRESSPOS}}
+                        name : {{target.properties.NAME}} postcode : {{target.properties.ADDRESSPOS}}
                     </li>
                 </ul>
             </li>
@@ -309,8 +278,8 @@
 <!-- Utility -->
 <script type="text/javascript" src="component/util.js"></script>
 <!-- MAIN -->
+<!-- Should rename to base.js later -->
 <script type="text/javascript" src="component/main.js"></script>
-
+<!-- Angular App Part, for some interactive functionalities -->
+<script type="text/javascript" src="component/app.js"></script>
 </html>
-<!-- File Upload. To be Done Later -->
-<!-- <script type="text/javascript" src="https://api.filepicker.io/v1/filepicker.js"></script> -->
