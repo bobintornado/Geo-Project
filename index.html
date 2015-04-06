@@ -112,27 +112,12 @@
                 <div class="modal-header">
                     <h4 class="modal-title" id="myModalLabel">L Function</h4>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" ng-controller="LController">
                     <form role="form" id="l_form">
                         <h3 class="first_title">Data be applied</h3>
-                        <div class="radio">
+                        <div class="radio" ng-repeat="data in list">
                             <label>
-                                <input type="radio" name="data-option" value=""> HDB (no data)
-                            </label>
-                        </div>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="data-option" value="data/MOH_CHAS_CLINICS_raw.js"> Clinics
-                            </label>
-                        </div>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="data-option" value="data/BREASTSCREEN_raw.js"> Screen Center
-                            </label>
-                        </div>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="data-option" value="data/ELDERCARE_raw.js"> Elderly Care
+                                <input type="radio" name="data-option" value=""> {{data.Name}}
                             </label>
                         </div>
                     </form>
@@ -151,50 +136,20 @@
                 <div class="modal-header">
                     <h4 class="modal-title" id="myModalLabel">Buffer</h4>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" ng-controller="BufferController">
                     <form role="form">
-                        <h3>Data be applied</h3>
-                        <div class="checkbox">
+                        <h3 class="first_title">Data be applied</h3>
+                        <div class="radio" ng-repeat="data in list">
                             <label>
-                                <input type="checkbox" value=""> HDB
-                            </label>
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" value=""> Clinics
-                            </label>
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" value=""> Screen Center
-                            </label>
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" value=""> Elderly Care
+                                <input type="radio" name="data-b-a" value=""> {{data.Name}}
                             </label>
                         </div>
                         <h3>Radius(in meters)</h3>
-                        <input type="text" name="distance" id="inputDistance" class="form-control" value="" required="required" pattern="" title="" placeholder="e.g. 500">
+                        <input type="text" name="distance" id="inputDistance" class="form-control" value="" required="required" pattern="" title="" placeholder="e.g. 500" ng-model="raidus">
                         <h3>Point to Count</h3>
-                        <div class="checkbox">
+                        <div class="radio" ng-repeat="data in list">
                             <label>
-                                <input type="checkbox" value=""> HDB
-                            </label>
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" value=""> Clinics
-                            </label>
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" value=""> Screen Center
-                            </label>
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" value=""> Elderly Care
+                                <input type="radio" name="data-t-b" value=""> {{data.Name}}
                             </label>
                         </div>
                     </form>

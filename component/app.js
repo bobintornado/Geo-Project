@@ -5,15 +5,15 @@ angular.module('geoApp', [])
             Name: 'HDB',
             URL: 'url',
             Date: 'update_on'
-        },{
+        }, {
             Name: 'Clinics',
             URL: 'url',
             Date: 'update_on'
-        },{
+        }, {
             Name: 'Screen Center',
             URL: 'url',
             Date: 'update_on'
-        },{
+        }, {
             Name: 'Elderly Care',
             URL: 'url',
             Date: 'update_on'
@@ -91,7 +91,13 @@ angular.module('geoApp', [])
     }])
     .controller('KDEController', ['$scope', 'DataList', function($scope, DataList) {
         $scope.list = DataList;
+    }])
+    .controller('LController', ['$scope', 'DataList', function($scope, DataList) {
+        $scope.list = DataList;
+    }])
+    .controller('BufferController', ['$scope', 'DataList', function($scope, DataList) {
+        $scope.list = DataList;
     }]);
 
-// Should put where the list is called
+// Move this to some where better
 $('body').addClass('loaded');

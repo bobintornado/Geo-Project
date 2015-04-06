@@ -24,6 +24,7 @@
     "tests"
   ],
   "dependencies": {
-    "c3": "~0.4.10"
+    "c3": "~0.4.10",
+    "angular-spinner": "~0.6.1"
   }
 }
