@@ -66,8 +66,8 @@
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <a class="btn" data-toggle="modal" data-target="#admin">
-                            Admin 
+                        <a class="btn" data-toggle="modal" data-target="#admin" onclick="getAllGEOJsons()">
+                            GEO File Mgmt 
                         </a>
                     </li>
                 </ul>
@@ -208,45 +208,61 @@
     </div>
     <!-- Admin -->
     <div class="modal fade" id="admin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">Admin</h4>
+                    <h4 class="modal-title" id="myModalLabel">GEOJSON File Management</h4>
                 </div>
                 <div class="modal-body">
-                    <table class="table table-bordered">
-                        <tr>
-                            <td>Data</td>
-                            <td>Action</td>
-                        </tr>
-                        <tr>
-                            <td>HDB</td>
-                            <td>
-                                <button type="button" class="btn btn-danger">Remove</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Clinics</td>
-                            <td>
-                                <button type="button" class="btn btn-danger">Remove</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Screen</td>
-                            <td>
-                                <button type="button" class="btn btn-danger">Remove</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Elderly</td>
-                            <td>
-                                <button type="button" class="btn btn-danger">Remove</button>
-                            </td>
-                        </tr>
-                    </table>
-                    <!-- <button type="button" class="btn btn-default btn-lg">Upload New Data</button> -->
-                    <h4>Upload New File</h4>
-                    <input type="filepicker" data-fp-apikey="AgEIfy26PSXqNSKhTogqEz" name="Upload New" />
+                    <div class="row">
+                    	<div class="col-md-12">
+							<table class="table table-striped table-hover">
+								<thead>
+									<tr>
+										<th>#</th>
+										<th>Name</th>
+										<th>URL</th>
+										<th>Date</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody id="geoJsons">
+								</tbody>
+							</table>
+						</div>
+                    </div>
+					<hr>
+                    <div class="row">
+                    	<div class="col-md-12">
+							<div class="form-horizontal">
+								<div class="form-group">
+									<label for="fileName" class="col-sm-2 control-label">File Name</label>
+									<div class="col-sm-10">
+										<input class="form-control input-default" type="text" placeholder="File Name..." id="fileName">
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="geoJsonFormBtn" class="col-sm-2 control-label">Upload File</label>
+									<div class="col-sm-10">
+										<form class="" enctype="multipart/form-data" method="post" name="geoJsonForm" id="geoJsonForm">
+											<input class="" type="file" name="file" onchange="uploadGeoJson('geoJson')" id="geoJsonFormBtn">
+										</form>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="geoJson" class="col-sm-2 control-label">File URL</label>
+									<div class="col-sm-10">
+										<input class="form-control" type="text" placeholder="File URL" id="geoJson" disabled>
+									</div>
+								</div>
+								<div class="form-group">
+									<div class="col-sm-offset-2 col-sm-10">
+										<button type="submit" class="btn btn-default" onclick="submitGEOJson()">Submit</button>
+									</div>
+								</div>
+							</div>
+						</div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
