@@ -1,103 +1,192 @@
-angular.module('geoApp', [])
-    .factory('DataList', function() {
-        // calling method goes there
-        var DataList = [{
-            Name: 'HDB',
-            URL: 'url',
-            Date: 'update_on'
-        }, {
-            Name: 'Clinics',
-            URL: 'url',
-            Date: 'update_on'
-        }, {
-            Name: 'Screen Center',
-            URL: 'url',
-            Date: 'update_on'
-        }, {
-            Name: 'Elderly Care',
-            URL: 'url',
-            Date: 'update_on'
-        }]
-        return DataList;
+current_L_source = '';
+
+// for every run. I need clear screen. Means I need to clean up previous action
+angular.module('geoApp', ['angularSpinner'])
+    .factory('DataList', function($http) {
+        // The sole copy to be used by the app
+        var _source = [];
+        $http.get('http://52.11.37.255:8080/GEO/GetAllGEOJSONFiles')
+            .success(function(data) {
+                if (data.status == 1) {
+                    _source = data.message.slice();
+                    // Load finished
+                    $('body').addClass('loaded');
+                };
+            });
+
+        var factory = {
+            getPromise: function() {
+                var promise = $http.get('http://52.11.37.255:8080/GEO/GetAllGEOJSONFiles');
+                return promise;
+            },
+            update: function() {
+                // update private source variable later
+            },
+            list: function() {
+                return _source;
+            }
+        }
+        return factory;
     })
-    .controller('detailsController', ['$scope', function($scope) {
+    .controller('DetailsController', ['$scope', '$rootScope', '$q', function($scope, $rootScope, $q) {
+        $scope.bufferInUse = false;
 
         $scope.features_in_check = {};
-        $scope.buffer_radius = 200;
 
-        $scope.add_feature = function(feature) {
+        // react to add/remove events
+        $rootScope.$on('add_feature', function(event, feature) {
             var id = feature.properties.OBJECTID;
             $scope.features_in_check[id] = feature;
             $scope.$apply();
-        };
-        $scope.remove_feature = function(feature) {
+        });
+
+        $rootScope.$on('remove_feature', function(event, feature) {
             var id = feature.properties.OBJECTID;
             delete $scope.features_in_check[id];
             $scope.$apply();
-        };
-
-        var clinics_options = {
-            pointToLayer: function(feature, latlng) {
-                mk = L.circleMarker(latlng);
-
-                // var centerLatLng = map.getCenter(); // get map center
-                var pointC = map.latLngToContainerPoint(latlng); // convert to containerpoint (pixels)
-                var pointX = [pointC.x + 1, pointC.y]; // add one pixel to x
-                var pointY = [pointC.x, pointC.y + 1]; // add one pixel to y
-
-                // convert containerpoints to latlng's
-                var latLngC = map.containerPointToLatLng(pointC);
-                var latLngX = map.containerPointToLatLng(pointX);
-                var latLngY = map.containerPointToLatLng(pointY);
-
-                var distanceX = latLngC.distanceTo(latLngX); // calculate distance between c and x (latitude)
-                var distanceY = latLngC.distanceTo(latLngY); // calculate distance between c and y (longitude)
-
-                var pixels = buffer_radius / distanceY;
-
-                // Difficulty in finding pixel per meters
-                mk.setRadius(pixels);
-
-                mk.on('mouseover', function() {
-                    $scope.add_feature(feature);
-                    console.log('mouseover');
-                });
-
-                mk.on('mouseout', function() {
-                    $scope.remove_feature(feature);
-                    console.log('mouseout');
-                });
-
-                return mk;
-            }
-        };
-
-        // Adding MOH_CHAS_CLINICS with circle marker option
-        MOH_CHAS_CLINICS_layer = L.geoJson(MOH_CHAS_CLINICS, clinics_options);
-        map.addLayer(MOH_CHAS_CLINICS_layer);
-        // Add Scale
-        L.control.scale().addTo(map);
-
-        // Re-plot points (for every single feature)
-        map.on('zoomend', function() {
-            // remove existing layer
-            map.removeLayer(MOH_CHAS_CLINICS_layer);
-            // add in new
-            MOH_CHAS_CLINICS_layer = L.geoJson(MOH_CHAS_CLINICS, clinics_options);
-            map.addLayer(MOH_CHAS_CLINICS_layer);
-            // Side effect distance must be known before 
-            // otherwise too slow
         });
-    }])
-    .controller('KDEController', ['$scope', 'DataList', function($scope, DataList) {
-        $scope.list = DataList;
-    }])
-    .controller('LController', ['$scope', 'DataList', function($scope, DataList) {
-        $scope.list = DataList;
-    }])
-    .controller('BufferController', ['$scope', 'DataList', function($scope, DataList) {
-        $scope.list = DataList;
-    }]);
 
-// Move this to some where better
-$('body').addClass('loaded');
+        $rootScope.$on('BufferOn', function() {
+            $scope.bufferInUse = true;
+        });
+
+        $scope.remove = function function_name(argument) {
+            map.removeLayer(source_layer);
+            map.removeLayer(target_layer);
+            $scope.bufferInUse = false;
+        }
+    }])
+    .controller('KDEController', ['$scope', 'DataList', '$rootScope', 'usSpinnerService', function($scope, DataList, $rootScope, usSpinnerService) {
+        $scope.list = [];
+        $scope.choice = {
+            url: ''
+        };
+        $rootScope.$on('KDE', function() {
+            $scope.list = DataList.list();
+        });
+        $scope.radius = {
+            value: 0
+        };
+        $scope.runKDE = function() {
+            // Spinner
+            usSpinnerService.spin('spinner');
+            // remove previous KDE layer
+            var theUrl = "http://52.11.37.255:8080/GEO/RequestRServlet?f=kde&r=" + $scope.radius.value + "&source=" + $scope.choice.url;
+            KDE(theUrl, usSpinnerService);
+        };
+    }])
+    .controller('LController', ['$scope', 'DataList', '$rootScope', 'usSpinnerService', function($scope, DataList, $rootScope, usSpinnerService) {
+        $scope.list = [];
+        $scope.choice = {
+            url: ''
+        };
+        // Update on Modal Open
+        $rootScope.$on('L Function', function() {
+            $scope.list = DataList.list();
+        });
+
+        $scope.runL = function() {
+            // Concat
+            usSpinnerService.spin('spinner');
+            var theUrl = "http://52.11.37.255:8080/GEO/RequestRServlet?f=l&source=" + $scope.choice.url;
+            xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function() {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    // functions are in util.js
+                    Global_D3_data = jQuery.parseJSON(xmlhttp.responseText);
+                    plot_L_result();
+                    usSpinnerService.stop('spinner');
+                }
+            };
+            xmlhttp.open("GET", theUrl, true);
+            xmlhttp.send();
+
+            // get source URL
+            current_L_source = $scope.choice.url;
+        };
+    }])
+    .controller('BufferController', ['$scope', 'DataList', '$rootScope', '$q', '$http', 'usSpinnerService', function($scope, DataList, $rootScope, $q, $http, usSpinnerService) {
+        $scope.list = DataList;
+        $rootScope.$on('Buffer', function() {
+            $scope.list = DataList.list();
+        });
+        $scope.buffer_config = {
+            source: '',
+            target: '',
+            radius: 0
+        };
+
+        $scope.source = {};
+        $scope.target = {};
+
+        $scope.runBuffer = function() {
+            usSpinnerService.spin('spinner');
+
+            var source_options = {
+                pointToLayer: function(feature, latlng) {
+                    mk = L.circleMarker(latlng);
+                    // Difficulty in finding pixel per meters, a bug here
+                    mk.setRadius(getPixels(latlng, $scope.buffer_config.radius));
+
+                    mk.on('mouseover', function() {
+                        $rootScope.$emit('add_feature', feature);
+                    });
+
+                    mk.on('mouseout', function() {
+                        $rootScope.$emit('remove_feature', feature);
+                    });
+
+                    return mk;
+                }
+            };
+
+            var promises = [];
+            promises.push($http.get("http://52.11.37.255:8080/GEO/S3JSONFile?source=" + $scope.buffer_config.source));
+            promises.push($http.get("http://52.11.37.255:8080/GEO/S3JSONFile?source=" + $scope.buffer_config.target));
+            $q.all(promises).then(function(array) {
+                $scope.source = array[0].data;
+                $scope.target = array[1].data;
+                calculate_buffer($scope.source, $scope.target, $scope.buffer_config.radius);
+
+
+                source_layer = L.geoJson($scope.source, source_options);
+                map.addLayer(source_layer);
+
+                target_layer = L.geoJson($scope.target);
+                map.addLayer(target_layer);
+                map.on('zoomend', function() {
+                    // redraw on zoomend
+                    map.removeLayer(source_layer);
+                    source_layer = L.geoJson($scope.source, source_options);
+                    map.addLayer(source_layer);
+                });
+                $rootScope.$emit('BufferOn');
+                // All done, stop spinning.
+                usSpinnerService.stop('spinner');
+            });
+
+        };
+    }])
+    .controller('NavController', ['$scope', '$rootScope', function($scope, $rootScope) {
+        $scope.buttons = [{
+            target: '#pattern',
+            name: 'KDE'
+        }, {
+            target: '#analysis',
+            name: 'L Function'
+        }, {
+            target: '#buffer',
+            name: 'Buffer'
+        }];
+        $scope.select = function(name) {
+            $rootScope.$emit(name);
+        };
+    }])
+    .controller('LkdeControl', ['$scope', 'usSpinnerService', function($scope, usSpinnerService) {
+        $scope.confirm = function() {
+            usSpinnerService.spin('spinner');
+            var r = $('#r').text();
+            var theUrl = "http://52.11.37.255:8080/GEO/RequestRServlet?f=kde&r=" + r + "&source=" + current_L_source;
+            KDE(theUrl, usSpinnerService)
+        };
+    }]);
