@@ -44,26 +44,25 @@ body {
     border-radius: 3px;
     width: 400px;
 }
-
 /* L function chart */
+
 #chart {
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.8);
     position: absolute!important;
     right: 5px;
     bottom: 5px;
     width: 61.8vw;
+    /*resize: auto;*/
 }
 
 #chart .c3-line {
     stroke-width: 1px;
 }
-
 /* Modal */
 
 .first_title {
     margin-top: 0;
 }
-
 /* Logo and animation */
 
 #logo {
@@ -74,8 +73,6 @@ body {
 #logo:hover {
     transform: rotate(-9deg);
 }
-
-
 /* Spinner */
 
 #loader-wrapper {
@@ -241,11 +238,10 @@ body {
     -webkit-transition: all 0.5s 0.5s ease-out;
     transition: all 0.5s 0.5s ease-out;
 }
-
-
 /* Geo Admin */
+
 .tableUrl {
-	max-width: 200px;
-	overflow-x: auto;
-	white-space: nowrap;
+    max-width: 200px;
+    overflow-x: auto;
+    white-space: nowrap;
 }

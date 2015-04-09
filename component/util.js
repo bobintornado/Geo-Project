@@ -3,6 +3,8 @@ Global_D3_data = {};
 Global_KDE_data = {};
 Global_heat_data = [];
 HeatmapLayer = {};
+source_layer = {};
+target_layer = {};
 
 KDE = function(theUrl, usSpinnerService) {
     if (map.hasLayer(HeatmapLayer)) {
@@ -35,14 +37,14 @@ KDE = function(theUrl, usSpinnerService) {
             var cfg = {
                 // radius should be small ONLY if scaleRadius is true (or small radius is intended)
                 // if scaleRadius is false it will be the constant radius used in pixels
-                "radius": .006,
+                "radius": .008,
                 "maxOpacity": .8,
                 // scales the radius based on map zoom
                 "scaleRadius": true,
                 // if set to false the heatmap uses the global maximum for colorization
                 // if activated: uses the data maximum within the current map boundaries 
                 //   (there will always be a red spot with useLocalExtremas true)
-                "useLocalExtrema": true,
+                "useLocalExtrema": false,
                 // which field name in your data represents the latitude - default "lat"
                 latField: 'lat',
                 // which field name in your data represents the longitude - default "lng"
@@ -85,7 +87,7 @@ plot_L_result = function() {
             x: 'r',
             columns: format_data,
             onclick: function(d, element) {
-                $('#ds').text($('#Lchoice').val());
+                $('#ds').text(Current_L_Name);
                 $('#r').text(d.x);
                 $('#lkde').modal('show');
             }
@@ -135,19 +137,19 @@ calculate_buffer = function(source, target, buffer_radius) {
 };
 
 // get Pixels method
-getPixels = function(latlng, radius) {
-    var pointC = map.latLngToContainerPoint(latlng); // convert to containerpoint (pixels)
-    var pointX = [pointC.x + 1, pointC.y]; // add one pixel to x
-    var pointY = [pointC.x, pointC.y + 1]; // add one pixel to y
+// getPixels = function(latlng, radius) {
+//     var pointC = map.latLngToContainerPoint(latlng); // convert to containerpoint (pixels)
+//     var pointX = [pointC.x + 1, pointC.y]; // add one pixel to x
+//     var pointY = [pointC.x, pointC.y + 1]; // add one pixel to y
 
-    // convert containerpoints to latlng's
-    var latLngC = map.containerPointToLatLng(pointC);
-    var latLngX = map.containerPointToLatLng(pointX);
-    var latLngY = map.containerPointToLatLng(pointY);
+//     // convert containerpoints to latlng's
+//     var latLngC = map.containerPointToLatLng(pointC);
+//     var latLngX = map.containerPointToLatLng(pointX);
+//     var latLngY = map.containerPointToLatLng(pointY);
 
-    var distanceX = latLngC.distanceTo(latLngX); // calculate distance between c and x (latitude)
-    var distanceY = latLngC.distanceTo(latLngY); // calculate distance between c and y (longitude)
+//     var distanceX = latLngC.distanceTo(latLngX); // calculate distance between c and x (latitude)
+//     var distanceY = latLngC.distanceTo(latLngY); // calculate distance between c and y (longitude)
 
-    var pixels = radius / distanceY;
-    return pixels;
-};
+//     var pixels = radius / distanceY;
+//     return pixels;
+// };

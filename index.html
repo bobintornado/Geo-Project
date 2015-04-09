@@ -114,7 +114,6 @@
                         <div class="radio" ng-repeat="data in list">
                             <label>
                                 <input type="radio" name="data-option" value="{{data.url}}" ng-model="choice.url"> {{data.name}}
-                                <input type="hidden" name="" id="Lchoice" class="form-control" value="{{data.name}}">
                             </label>
                         </div>
                     </form>
@@ -227,10 +226,14 @@
         <p>Details</p>
         <ul>
             <li ng-repeat="(key, value) in features_in_check">
-                within {{buffer_radius}} around {{value.properties.HCI_NAME}}, there are
+                within {{buffer_radius}} meters catchment of {{value.properties.HCI_NAME}}, there are
                 <ul>
                     <li ng-repeat="target in value.inRange">
-                        name : {{target.properties.NAME}} postcode : {{target.properties.ADDRESSPOS}}
+                        <ul>
+                            <li ng-repeat="(key, value) in target.properties">
+                                {{key}}:{{value}}
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </li>

@@ -5,7 +5,7 @@ angular.module('geoApp', ['angularSpinner'])
     .factory('DataList', function($http) {
         // The sole copy to be used by the app
         var _source = [];
-        $http.get('http://52.11.37.255:8080/GEO/GetAllGEOJSONFiles')
+        $http.get('http://54.200.37.207:8080/GEO/GetAllGEOJSONFiles')
             .success(function(data) {
                 if (data.status == 1) {
                     _source = data.message.slice();
@@ -16,7 +16,7 @@ angular.module('geoApp', ['angularSpinner'])
 
         var factory = {
             getPromise: function() {
-                var promise = $http.get('http://52.11.37.255:8080/GEO/GetAllGEOJSONFiles');
+                var promise = $http.get('http://54.200.37.207:8080/GEO/GetAllGEOJSONFiles');
                 return promise;
             },
             update: function() {
@@ -30,6 +30,10 @@ angular.module('geoApp', ['angularSpinner'])
     })
     .controller('DetailsController', ['$scope', '$rootScope', '$q', function($scope, $rootScope, $q) {
         $scope.bufferInUse = false;
+        $scope.buffer_radius = 0;
+        $rootScope.$on('bufferR', function(event, r){
+            $scope.buffer_radius = r;
+        });
 
         $scope.features_in_check = {};
 
@@ -71,7 +75,7 @@ angular.module('geoApp', ['angularSpinner'])
             // Spinner
             usSpinnerService.spin('spinner');
             // remove previous KDE layer
-            var theUrl = "http://52.11.37.255:8080/GEO/RequestRServlet?f=kde&r=" + $scope.radius.value + "&source=" + $scope.choice.url;
+            var theUrl = "http://54.200.37.207:8080/GEO/RequestRServlet?f=kde&r=" + $scope.radius.value + "&source=" + $scope.choice.url;
             KDE(theUrl, usSpinnerService);
         };
     }])
@@ -88,7 +92,14 @@ angular.module('geoApp', ['angularSpinner'])
         $scope.runL = function() {
             // Concat
             usSpinnerService.spin('spinner');
-            var theUrl = "http://52.11.37.255:8080/GEO/RequestRServlet?f=l&source=" + $scope.choice.url;
+
+            // set L name
+            for (var i = $scope.list.length - 1; i >= 0; i--) {
+                if ($scope.list[i].url == $scope.choice.url) {
+                    Current_L_Name = $scope.list[i].name;
+                };
+            };
+            var theUrl = "http://54.200.37.207:8080/GEO/RequestRServlet?f=l&source=" + $scope.choice.url;
             xmlhttp = new XMLHttpRequest();
             xmlhttp.onreadystatechange = function() {
                 if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -122,11 +133,19 @@ angular.module('geoApp', ['angularSpinner'])
         $scope.runBuffer = function() {
             usSpinnerService.spin('spinner');
 
+            // Set radius
+            $rootScope.$emit('bufferR', $scope.buffer_config.radius);
+
+            // remove previous layers
+            map.removeLayer(source_layer);
+            map.removeLayer(target_layer);
+
             var source_options = {
                 pointToLayer: function(feature, latlng) {
-                    mk = L.circleMarker(latlng);
+                    // mk = L.circleMarker(latlng);
                     // Difficulty in finding pixel per meters, a bug here
-                    mk.setRadius(getPixels(latlng, $scope.buffer_config.radius));
+                    // mk.setRadius(getPixels(latlng, $scope.buffer_config.radius));
+                    mk = L.circle(latlng, $scope.buffer_config.radius)
 
                     mk.on('mouseover', function() {
                         $rootScope.$emit('add_feature', feature);
@@ -141,8 +160,8 @@ angular.module('geoApp', ['angularSpinner'])
             };
 
             var promises = [];
-            promises.push($http.get("http://52.11.37.255:8080/GEO/S3JSONFile?source=" + $scope.buffer_config.source));
-            promises.push($http.get("http://52.11.37.255:8080/GEO/S3JSONFile?source=" + $scope.buffer_config.target));
+            promises.push($http.get("http://54.200.37.207:8080/GEO/S3JSONFile?source=" + $scope.buffer_config.source));
+            promises.push($http.get("http://54.200.37.207:8080/GEO/S3JSONFile?source=" + $scope.buffer_config.target));
             $q.all(promises).then(function(array) {
                 $scope.source = array[0].data;
                 $scope.target = array[1].data;
@@ -186,7 +205,7 @@ angular.module('geoApp', ['angularSpinner'])
         $scope.confirm = function() {
             usSpinnerService.spin('spinner');
             var r = $('#r').text();
-            var theUrl = "http://52.11.37.255:8080/GEO/RequestRServlet?f=kde&r=" + r + "&source=" + current_L_source;
+            var theUrl = "http://54.200.37.207:8080/GEO/RequestRServlet?f=kde&r=" + r + "&source=" + current_L_source;
             KDE(theUrl, usSpinnerService)
         };
     }]);

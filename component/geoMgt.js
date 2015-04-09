@@ -7,7 +7,7 @@
 function uploadGeoJson(id){
 	var fd = new FormData(document.getElementById(id+"Form"));
 	$.ajax({
-		url : 'http://52.11.37.255:8080/GEO/UploadServlet?json={"fileType":"js,json,geojson,text","uploadDirectory":"geo","folderName":"geojson"}',
+		url : 'http://54.200.37.207:8080/GEO/UploadServlet?json={"fileType":"js,json,geojson,text","uploadDirectory":"geo","folderName":"geojson"}',
 		type : "POST",
 		data : fd,
 		dataType : 'json',
@@ -43,7 +43,7 @@ function submitGEOJson(){
 	inputJson = encodeURIComponent(inputJson);
 	
 	$.ajax({
-		url : 'http://52.11.37.255:8080/GEO/UploadGEOJSONFile?json='+inputJson,
+		url : 'http://54.200.37.207:8080/GEO/UploadGEOJSONFile?json='+inputJson,
 		type : 'GET',
 		dataType : 'json',
 		error : function(err){
@@ -69,7 +69,7 @@ function submitGEOJson(){
 
 function getAllGEOJsons(){
 	$.ajax({
-		url : 'http://52.11.37.255:8080/GEO/GetAllGEOJSONFiles',
+		url : 'http://54.200.37.207:8080/GEO/GetAllGEOJSONFiles',
 		type : 'GET',
 		dataType : 'json',
 		error : function(err){
@@ -119,7 +119,7 @@ function deleteJsonFile(id){
 		inputJson = encodeURIComponent(inputJson);
 		
 		$.ajax({
-			url : 'http://52.11.37.255:8080/GEO/DeleteGeoJSONFile?json='+inputJson,
+			url : 'http://54.200.37.207:8080/GEO/DeleteGeoJSONFile?json='+inputJson,
 			type : 'GET',
 			dataType : 'json',
 			error : function(err){
