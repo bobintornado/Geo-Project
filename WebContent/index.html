@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html ng-app="geoApp">
+
+<head>
+    <title>Geo Project</title>
+    <meta charset="UTF8">
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <!-- Use Bower! -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <!-- endbower -->
+    <!-- bower:js -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/spin.js/spin.js"></script>
+    <script src="bower_components/angular-spinner/angular-spinner.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <!-- endbower -->
+    <!-- adding D3 and C3 manually -->
+    <script charset="UTF8" src="bower_components/d3/d3.min.js"></script>
+    <script type="text/javascript" src="bower_components/c3/c3.js"></script>
+    <link rel="stylesheet" type="text/css" href="bower_components/c3/c3.css">
+    <!-- Leaflet Stuff -->
+    <link rel="stylesheet" href="component/leaflet/leaflet.css" />
+    <script src="component/leaflet/leaflet.js"></script>
+    <!-- Heat Map Stuff -->
+    <script src="component/heat/heatmap.js"></script>
+    <script src="component/heat/leaflet-heatmap.js"></script>
+</head>
+
+<body>
+    <!-- Initial loading spinner -->
+    <div id="loader-wrapper">
+        <div id="loader"></div>
+        <div class="loader-section section-left"></div>
+        <div class="loader-section section-right"></div>
+    </div>
+    <div id="loading-spinner">
+        <span us-spinner spinner-key="spinner"></span>
+    </div>
+    <!-- Nav -->
+    <nav class="navbar navbar-default" ng-controller="NavController">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">
+                    <img alt="Logo" src="images/BYQLogo.png" id="logo">
+                </a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li ng-repeat="b in buttons">
+                        <a class="btn" data-toggle="modal" data-target="{{b.target}}" ng-click="select(b.name)">
+                            {{b.name}} 
+                            <!-- <span class="sr-only" ng-show="active(b.name)">(current)</span> -->
+                        </a>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a class="btn" data-toggle="modal" data-target="#admin" onclick="getAllGEOJsons()">
+                            GEO File Mgmt 
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+    <!-- Map -->
+    <div id="map"></div>
+    <div id="result">
+        <!-- <img id="result_img" src="http://strata.uga.edu/6370/lecturenotes/images/likelihoodCurves3.png"> -->
+    </div>
+    <!-- Pattern Modal -->
+    <div class="modal fade" id="pattern" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" ng-controller="KDEController">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">KDE</h4>
+                </div>
+                <div class="modal-body">
+                    <h3 class="first_title">Chose the dataset to run KDE</h3>
+                    <form role="form">
+                        <div class="radio" ng-repeat="data in list">
+                            <label>
+                                <input type="radio" name="data-option" value="{{data.url}}" ng-model="choice.url"> {{data.name}}
+                            </label>
+                        </div>
+                        <h3>Chose Radius (In meters)</h3>
+                        <input type="number" name="raidus" id="inputRaidus" class="form-control" value="" step="1" required="required" title="" placeholder="e.g. 200" ng-model="radius.value">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="runKDE()">Run</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Analysis Pop Up -->
+    <div class="modal fade" id="analysis" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" ng-controller="LController">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">L Function</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form" id="l_form">
+                        <h3 class="first_title">Run L Function on</h3>
+                        <div class="radio" ng-repeat="data in list">
+                            <label>
+                                <input type="radio" name="data-option" value="{{data.url}}" ng-model="choice.url"> {{data.name}}
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="runL()">Run</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Buffer Pop Up -->
+    <div class="modal fade" id="buffer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" ng-controller="BufferController">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Buffer</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form">
+                        <h3 class="first_title">Data be applied</h3>
+                        <div class="radio" ng-repeat="data in list">
+                            <label>
+                                <input type="radio" name="data-source" value="{{data.url}}" ng-model="buffer_config.source"> {{data.name}}
+                            </label>
+                        </div>
+                        <h3>Radius(in meters)</h3>
+                        <input type="number" name="" id="inputDistance" class="form-control" value="" step="1" required="required" title="" placeholder="e.g. 200" ng-model="buffer_config.radius">
+                        <h3>Point to Count</h3>
+                        <div class="radio" ng-repeat="data in list">
+                            <label>
+                                <input type="radio" name="data-target" value="{{data.url}}" ng-model="buffer_config.target"> {{data.name}}
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="runBuffer()">Run</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Admin -->
+    <div class="modal fade" id="admin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">GEOJSON File Management</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>URL</th>
+                                        <th>Date</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="geoJsons">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-horizontal">
+                                <div class="form-group">
+                                    <label for="fileName" class="col-sm-2 control-label">File Name</label>
+                                    <div class="col-sm-10">
+                                        <input class="form-control input-default" type="text" placeholder="File Name..." id="fileName">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="geoJsonFormBtn" class="col-sm-2 control-label">Upload File</label>
+                                    <div class="col-sm-10">
+                                        <form class="" enctype="multipart/form-data" method="post" name="geoJsonForm" id="geoJsonForm">
+                                            <input class="" type="file" name="file" onchange="uploadGeoJson('geoJson')" id="geoJsonFormBtn">
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="geoJson" class="col-sm-2 control-label">File URL</label>
+                                    <div class="col-sm-10">
+                                        <input class="form-control" type="text" placeholder="File URL" id="geoJson" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <button type="submit" class="btn btn-default" onclick="submitGEOJson()">Confirm</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Buffer Details -->
+    <div ng-controller="DetailsController" id="details" ng-show="bufferInUse">
+        <p>Details</p>
+        <ul>
+            <li ng-repeat="(key, value) in features_in_check">
+                within {{buffer_radius}} meters catchment of {{value.properties.HCI_NAME}}, there are
+                <ul>
+                    <li ng-repeat="target in value.inRange">
+                        <ul>
+                            <li ng-repeat="(key, value) in target.properties">
+                                {{key}}:{{value}}
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <button type="button" class="btn btn-danger" ng-click="remove()">Remove</button>
+    </div>
+    <!-- Chart -->
+    <div id="chart"></div>
+    <div class="modal fade" id="lkde" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" <div ng-controller="LkdeControl">>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">KDE</h4>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to run KDE on <span id="ds"></span> at radius of <span id="r"> </span> meters?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="confirm()">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- DATA HARDCODED -->
+<!-- <script type="text/javascript" src="data/MOH_CHAS_CLINICS.js"></script>
+<script type="text/javascript" src="data/BREASTSCREEN.js"></script>
+<script type="text/javascript" src="data/ELDERCARE.js"></script> -->
+<!-- Utility -->
+<script type="text/javascript" src="component/util.js"></script>
+<script type="text/javascript" src="component/geoMgt.js"></script>
+<!-- MAIN -->
+<!-- Should rename to base.js later -->
+<script type="text/javascript" src="component/main.js"></script>
+<!-- Angular App Part, for some interactive functionalities -->
+<script type="text/javascript" src="component/app.js"></script>
+
+</html>

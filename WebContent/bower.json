@@ -1,0 +1,32 @@
+{
+  "name": "geo",
+  "version": "0.0.0",
+  "homepage": "https://github.com/bobintornado/geo-project",
+  "authors": [
+    "Bob Cao <bobintornado@gmail.com>"
+  ],
+  "description": "bower file for geo project",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "geo",
+    "project",
+    "is415"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-spinner": "~0.6.1",
+    "jquery": "~2.1.3",
+    "bootstrap": "~3.3.4",
+    "c3": "~0.4.10"
+  }
+}

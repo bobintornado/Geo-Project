@@ -1,0 +1,5 @@
+.tableUrl {
+	max-width: 160px;
+	overflow-x: auto;
+	white-space: nowrap;
+}
